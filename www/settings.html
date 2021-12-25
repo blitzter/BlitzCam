@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BlitzCam Settings</title>
+    <script src="/jquery-3.6.0.js"></script>
+    <style>
+        html, body, img, div, p {
+          padding:0px;
+          border:0px;
+          margin:0px;
+        }
+        body {
+          overflow-y: hidden;
+          overflow-x: hidden;
+        }
+        #top_bar {
+          position: absolute;
+          left: 0px;
+          top: 0px;
+          width: 800px;
+          height: 50px;
+        }
+        #settings {
+          position: absolute;
+          left: 0px;
+          top: 50px;
+          width: 800px;
+          height: 430px;
+        }
+        .hud_button_left {
+          width: 50px;
+          height: 50px;
+          float: left;
+          vertical-align: top;
+          margin: 2px;
+          padding: 0px;
+          background-color: transparent;
+          border: 0px;
+        }
+        .hud_button_right {
+          width: 50px;
+          height: 50px;
+          float: right;
+          vertical-align: top;
+          margin: 2px;
+          padding: 0px;
+          background-color: transparent;
+          border: 0px;
+        }
+        .hud_button {
+          width: 48px;
+          height: 48px;
+          margin: 1px;
+          padding: 0px;
+        }
+        #top_bar h3 {
+          text-align: center;
+        }
+        #settings_ul {
+          padding: 0px
+        }
+        .group_name {
+          text-align: center;
+          background: #aaa;
+          list-style-type: none;
+          font-size: xx-large;
+        }
+        .group_name li {
+          list-style-type: none;
+          font-size: x-large;
+        }
+
+    </style>
+</head>
+<body>
+<div id="interface_div">
+    <div id="top_bar">
+        <button class="hud_button_left" id="back" type="button">
+            <img class="hud_button" src="/arrow_back/materialicons/48dp/1x/baseline_arrow_back_black_48dp.png"/>
+        </button>
+        <button class="hud_button_right" id="save" type="button">
+            <img class="hud_button" src="/save/materialicons/48dp/1x/baseline_save_black_48dp.png"/>
+        </button>
+    </div>
+    <div id="settings">
+        <ul id="settings_ul"></ul>
+    </div>
+</div>
+<script>
+$( document ).ready(function() {
+  $('#back').on("click", function() {
+    $(location).attr("href", "/index.html");
+  });
+  $('#save').on("click", function() {
+    data = {}
+    $("#settings_ul").find(":input").each(function(){
+      console.log($(this).attr('name') + '=' + $(this).val());
+      data[$(this).attr('name')] = $(this).val();
+    });
+    $.post("/save_settings", JSON.stringify(data), function(result){
+      console.log("Message : "+result["message"]);
+    });
+  });
+  $.getJSON( "/get_all_settings.json", function( data ) {
+    for(group in data) {
+        $("#settings_ul").append("<li class=\"group_name\">"+group.toUpperCase()+"</li>")
+        for(prop in data[group]) {
+            $("#settings_ul").append("<li>" + prop.toUpperCase() + " : <input type=\"text\" value=\""
+            + data[group][prop] + "\" name=\"" + group + "." + prop + "\" /></li>");
+        }
+    }
+  });
+});
+
+</script>
+</body>
+</html>
