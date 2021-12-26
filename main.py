@@ -63,6 +63,15 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.send_header('Content-Length', len(content))
             self.end_headers()
             self.wfile.write(content)
+        elif self.path.endswith(".css"):
+            file = open("www/css" + self.path, "r")
+            content = file.read().encode('utf-8')
+            file.close()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/css')
+            self.send_header('Content-Length', len(content))
+            self.end_headers()
+            self.wfile.write(content)
         elif self.path.endswith(".png"):
             file = open("www/img" + self.path, "rb")
             content = file.read()
@@ -86,6 +95,9 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.send_header('Pragma', 'no-cache')
             self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
             self.end_headers()
+            self.stop_recording()
+            self.update_for_live_view()
+            view_camera.start_recording(output, format='mjpeg')
             try:
                 while True:
                     with output.condition:
@@ -111,18 +123,17 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             return '{"message": "Powering Off"}'
         elif self.path == '/get_all_settings.json':
             return cam_settings.get_all_settings()
+        elif self.path == '/get_all_options.json':
+            return cam_settings.get_all_options()
         elif self.path == '/take_photo.json':
             view_camera.stop_recording()
             filename = 'data/captures/' + (str(time.time()).replace(".", "_")) + '.jpg'
             try:
-                view_camera.resolution = (cam_settings.get_property("still", "width"),
-                                          cam_settings.get_property("still", "height"))
+                view_camera.resolution = cam_settings.get_property("still", "resolution")
                 view_camera.capture(filename)
                 print("Image Captured!")
             finally:
-                view_camera.resolution = (cam_settings.get_property("display", "width"),
-                                          cam_settings.get_property("display", "height"))
-                view_camera.framerate = cam_settings.get_property("display", "framerate")
+                self.update_for_live_view()
                 view_camera.start_recording(output, format='mjpeg')
             return '{"message": "File Captured ' + filename + '"}'
         else:
@@ -138,6 +149,17 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             return '{"message": "Save Successful"}'
         else:
             return '{"message": "method_not_found"}'
+
+    def update_for_live_view(self):
+        view_camera.resolution = (cam_settings.get_property("display", "width"),
+                                  cam_settings.get_property("display", "height"))
+        view_camera.framerate = cam_settings.get_property("display", "framerate")
+
+    def stop_recording(self):
+        try:
+            view_camera.stop_recording()
+        except picamera.exc.PiCameraNotRecording:
+            logging.warning("Camera not Recording")
 
 
 class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):

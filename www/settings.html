@@ -4,74 +4,7 @@
     <meta charset="UTF-8">
     <title>BlitzCam Settings</title>
     <script src="/jquery-3.6.0.js"></script>
-    <style>
-        html, body, img, div, p {
-          padding:0px;
-          border:0px;
-          margin:0px;
-        }
-        body {
-          overflow-y: hidden;
-          overflow-x: hidden;
-        }
-        #top_bar {
-          position: absolute;
-          left: 0px;
-          top: 0px;
-          width: 800px;
-          height: 50px;
-        }
-        #settings {
-          position: absolute;
-          left: 0px;
-          top: 50px;
-          width: 800px;
-          height: 430px;
-        }
-        .hud_button_left {
-          width: 50px;
-          height: 50px;
-          float: left;
-          vertical-align: top;
-          margin: 2px;
-          padding: 0px;
-          background-color: transparent;
-          border: 0px;
-        }
-        .hud_button_right {
-          width: 50px;
-          height: 50px;
-          float: right;
-          vertical-align: top;
-          margin: 2px;
-          padding: 0px;
-          background-color: transparent;
-          border: 0px;
-        }
-        .hud_button {
-          width: 48px;
-          height: 48px;
-          margin: 1px;
-          padding: 0px;
-        }
-        #top_bar h3 {
-          text-align: center;
-        }
-        #settings_ul {
-          padding: 0px
-        }
-        .group_name {
-          text-align: center;
-          background: #aaa;
-          list-style-type: none;
-          font-size: xx-large;
-        }
-        .group_name li {
-          list-style-type: none;
-          font-size: x-large;
-        }
-
-    </style>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div id="interface_div">
@@ -83,7 +16,7 @@
             <img class="hud_button" src="/save/materialicons/48dp/1x/baseline_save_black_48dp.png"/>
         </button>
     </div>
-    <div id="settings">
+    <div id="settings_div">
         <ul id="settings_ul"></ul>
     </div>
 </div>
@@ -102,14 +35,27 @@ $( document ).ready(function() {
       console.log("Message : "+result["message"]);
     });
   });
-  $.getJSON( "/get_all_settings.json", function( data ) {
-    for(group in data) {
-        $("#settings_ul").append("<li class=\"group_name\">"+group.toUpperCase()+"</li>")
-        for(prop in data[group]) {
-            $("#settings_ul").append("<li>" + prop.toUpperCase() + " : <input type=\"text\" value=\""
-            + data[group][prop] + "\" name=\"" + group + "." + prop + "\" /></li>");
+  var propOptions = {}
+  $.getJSON( "/get_all_options.json", function( data ) {
+    propOptions = data;
+    $.getJSON( "/get_all_settings.json", function( settings ) {
+        for(group in propOptions) {
+            $("#settings_ul").append("<li class=\"group_name\">"+group.toUpperCase()+"</li>")
+            for(prop in propOptions[group]) {
+                name = group + "." + prop;
+                listItem = '<li>' + prop.toUpperCase() + ' : <select name="' + name + '">';
+                for(optValue in propOptions[group][prop]) {
+                    listItem += '<option value="'+propOptions[group][prop][optValue] + '" ';
+                    if(propOptions[group][prop][optValue]+'' == settings[group][prop]+'') {
+                        listItem += "selected";
+                    }
+                    listItem += ' >'+propOptions[group][prop][optValue]+'</option>';
+                }
+                listItem += '</select></li>';
+                $("#settings_ul").append(listItem);
+            }
         }
-    }
+    });
   });
 });
 

@@ -1,0 +1,98 @@
+html, body, img, div {
+  padding:0px;
+  border:0px;
+  margin:0px;
+}
+body {
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+#camera_img {
+  z-index:0;
+}
+#camera_div {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 800px;
+  height: 480px;
+  z-index: 0;
+}
+#interface_div {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 800px;
+  height: 480px;
+  z-index: 1;
+}
+#top_bar {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 800px;
+  height: 60px;
+}
+#bottom_bar {
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  width: 800px;
+  height: 60px;
+}
+.hud_button_right {
+  width: 60px;
+  height: 60px;
+  float: right;
+  vertical-align: top;
+  margin: 2px;
+  padding: 0px;
+  background-color: rgba(c,c,c,0.3);
+  border: 0px;
+}
+.hud_button_left {
+  width: 60px;
+  height: 60px;
+  float: left;
+  vertical-align: top;
+  margin: 2px;
+  padding: 0px;
+  background-color: rgba(c,c,c,0.3);
+  border: 0px;
+}
+.hud_button {
+  width: 48px;
+  height: 48px;
+  margin: 1px;
+  padding: 0px;
+  background-color: transparent;
+}
+.hud_button_big {
+  width: 56px;
+  height: 56px;
+  margin: 1px;
+  padding: 0px;
+}
+#settings_div {
+  position: absolute;
+  left: 0px;
+  top: 50px;
+  width: 800px;
+  height: 430px;
+}
+#top_bar h3 {
+  text-align: center;
+}
+#settings_ul {
+  padding: 0px
+}
+.group_name {
+  text-align: center;
+  background: #aaa;
+  list-style-type: none;
+  font-size: xx-large;
+}
+.group_name li {
+  list-style-type: none;
+  font-size: x-large;
+}

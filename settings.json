@@ -5,7 +5,10 @@
     "framerate": 16
   },
   "still": {
-    "width": 4056,
-    "height": 3040
+    "resolution": "4056x3040"
+  },
+  "video": {
+    "resolution": "1280x720",
+    "framerate": 90
   }
 }
