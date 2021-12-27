@@ -4,7 +4,7 @@ Camera interface for Raspberry Pi HQ Camera + HDMI touchscreen
 ## Planned features
 * Take Photos and save to a path (Done)
 * Settings Interface for saving camera settings (Done)
-* Support for multiple Displays 
+* Support for others Display Resolutions 
 * Gallery View
 * All features of HQ camera supported from touch UI
 * Add Video support

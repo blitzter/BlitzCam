@@ -2,6 +2,7 @@ import io
 import json
 import os
 import time
+from typing import Tuple
 
 import picamera
 import logging
@@ -31,12 +32,53 @@ class StreamingOutput(object):
         return self.buffer.write(buf)
 
 
+def set_current_modes(data):
+    if "AWB_MODE" in data:
+        view_camera.awb_mode = data["AWB_MODE"]
+    if "EXPOSURE_MODE" in data:
+        view_camera.exposure_mode = data["EXPOSURE_MODE"]
+    if "METER_MODE" in data:
+        view_camera.meter_mode = data["METER_MODE"]
+    if "IMAGE_EFFECT" in data:
+        view_camera.image_effect = data["IMAGE_EFFECT"]
+    if "DRC_STRENGTH" in data:
+        view_camera.drc_strength = data["DRC_STRENGTH"]
+    return '{"message": "Updated Mode"}'
+
+
+def get_current_modes():
+    current_modes = {
+        "AWB_MODE": view_camera.awb_mode,
+        "EXPOSURE_MODE": view_camera.exposure_mode,
+        "METER_MODE": view_camera.meter_mode,
+        "IMAGE_EFFECT": view_camera.image_effect,
+        "DRC_STRENGTH": view_camera.drc_strength}
+    return json.dumps(current_modes, sort_keys=True, indent=4)
+
+
+def stop_recording():
+    try:
+        view_camera.stop_recording()
+    except picamera.exc.PiCameraNotRecording:
+        logging.warning("Camera not Recording")
+
+
+def update_for_live_view():
+    view_camera.resolution = (cam_settings.get_property("display", "width"),
+                              cam_settings.get_property("display", "height"))
+    view_camera.framerate = cam_settings.get_property("display", "framerate")
+
+
 class StreamingHandler(server.BaseHTTPRequestHandler):
+    def __init__(self, request: bytes, client_address: Tuple[str, int], server: socketserver.BaseServer):
+        super().__init__(request, client_address, server)
+        self.modes = None
+
     def do_POST(self):
         content = self.handle_post().encode('utf-8')
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
-        self.send_header('Content-Length', len(content))
+        self.send_header('Content-Length', str(len(content)))
         self.end_headers()
         self.wfile.write(content)
 
@@ -51,7 +93,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             file.close()
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
-            self.send_header('Content-Length', len(content))
+            self.send_header('Content-Length', str(len(content)))
             self.end_headers()
             self.wfile.write(content)
         elif self.path.endswith(".js"):
@@ -60,7 +102,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             file.close()
             self.send_response(200)
             self.send_header('Content-Type', 'application/javascript')
-            self.send_header('Content-Length', len(content))
+            self.send_header('Content-Length', str(len(content)))
             self.end_headers()
             self.wfile.write(content)
         elif self.path.endswith(".css"):
@@ -69,7 +111,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             file.close()
             self.send_response(200)
             self.send_header('Content-Type', 'text/css')
-            self.send_header('Content-Length', len(content))
+            self.send_header('Content-Length', str(len(content)))
             self.end_headers()
             self.wfile.write(content)
         elif self.path.endswith(".png"):
@@ -78,14 +120,14 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             file.close()
             self.send_response(200)
             self.send_header('Content-Type', 'image/png')
-            self.send_header('Content-Length', len(content))
+            self.send_header('Content-Length', str(len(content)))
             self.end_headers()
             self.wfile.write(content)
         elif self.path.endswith(".json"):
             content = self.handle_get().encode('utf-8')
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Content-Length', len(content))
+            self.send_header('Content-Length', str(len(content)))
             self.end_headers()
             self.wfile.write(content)
         elif self.path == '/stream.mjpg':
@@ -95,8 +137,8 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.send_header('Pragma', 'no-cache')
             self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
             self.end_headers()
-            self.stop_recording()
-            self.update_for_live_view()
+            stop_recording()
+            update_for_live_view()
             view_camera.start_recording(output, format='mjpeg')
             try:
                 while True:
@@ -105,7 +147,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                         frame = output.frame
                     self.wfile.write(b'--FRAME\r\n')
                     self.send_header('Content-Type', 'image/jpeg')
-                    self.send_header('Content-Length', len(frame))
+                    self.send_header('Content-Length', str(len(frame)))
                     self.end_headers()
                     self.wfile.write(frame)
                     self.wfile.write(b'\r\n')
@@ -125,6 +167,10 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             return cam_settings.get_all_settings()
         elif self.path == '/get_all_options.json':
             return cam_settings.get_all_options()
+        elif self.path == '/get_all_modes.json':
+            return self.get_all_modes()
+        elif self.path == '/get_current_modes.json':
+            return get_current_modes()
         elif self.path == '/take_photo.json':
             view_camera.stop_recording()
             filename = 'data/captures/' + (str(time.time()).replace(".", "_")) + '.jpg'
@@ -133,7 +179,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 view_camera.capture(filename)
                 print("Image Captured!")
             finally:
-                self.update_for_live_view()
+                update_for_live_view()
                 view_camera.start_recording(output, format='mjpeg')
             return '{"message": "File Captured ' + filename + '"}'
         else:
@@ -147,19 +193,23 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 parts = prop.split(".")
                 cam_settings.set_property(parts[0], parts[1], data[prop])
             return '{"message": "Save Successful"}'
+        if self.path == '/save_modes':
+            data = json.loads(self.rfile.read(content_len).decode())
+            set_current_modes(data)
+            return '{"message": "Save Successful"}'
         else:
             return '{"message": "method_not_found"}'
 
-    def update_for_live_view(self):
-        view_camera.resolution = (cam_settings.get_property("display", "width"),
-                                  cam_settings.get_property("display", "height"))
-        view_camera.framerate = cam_settings.get_property("display", "framerate")
-
-    def stop_recording(self):
+    def get_all_modes(self):
         try:
-            view_camera.stop_recording()
-        except picamera.exc.PiCameraNotRecording:
-            logging.warning("Camera not Recording")
+            print(len(self.modes["AWB_MODES"]))
+        except AttributeError:
+            self.modes = {"AWB_MODE": view_camera.AWB_MODES,
+                          "EXPOSURE_MODE": view_camera.EXPOSURE_MODES,
+                          "METER_MODE": view_camera.METER_MODES,
+                          "IMAGE_EFFECT": view_camera.IMAGE_EFFECTS,
+                          "DRC_STRENGTH": view_camera.DRC_STRENGTHS}
+        return json.dumps(self.modes, sort_keys=True, indent=4)
 
 
 class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):

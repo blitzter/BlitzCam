@@ -11,6 +11,9 @@
         <button class="hud_button_left" id="settings" type="button" value="settings">
             <img class="hud_button" src="/settings/materialicons/48dp/1x/baseline_settings_black_48dp.png"/>
         </button>
+        <button class="hud_button_left" id="modes" type="button" value="modes">
+            <img class="hud_button" src="/camera_enhance/materialicons/48dp/1x/baseline_camera_enhance_black_48dp.png"/>
+        </button>
         <button class="hud_button_right" onClick="window.location.reload();" type="button" value="Refresh">
             <img class="hud_button" src="/refresh/materialicons/48dp/1x/baseline_refresh_black_48dp.png"/>
         </button>
@@ -28,6 +31,9 @@
 $( document ).ready(function() {
   $('#settings').on("click", function() {
     $(location).attr("href", "/settings.html");
+  });
+  $('#modes').on("click", function() {
+    $(location).attr("href", "/modes.html");
   });
   $('#power_off').on("click", function() {
     if (confirm("Shutdown for sure?") == true) {
