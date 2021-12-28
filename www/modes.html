@@ -41,7 +41,7 @@ $( document ).ready(function() {
     $.getJSON( "/get_current_modes.json", function( settings ) {
         for(prop in propOptions) {
             name = prop;
-            listItem = '<li>' + prop.toUpperCase() + ' : <select name="' + name + '">';
+            listItem = '<li class="group_element">' + prop.toUpperCase() + ' : <select name="' + name + '">';
             for(optValue in propOptions[prop]) {
                 listItem += '<option value="' + optValue + '" ';
                 if(optValue+'' == settings[prop]+'') {

@@ -90,9 +90,17 @@ body {
   text-align: center;
   background: #aaa;
   list-style-type: none;
-  font-size: xx-large;
+  font-size: 30px;
 }
-.group_name li {
+.group_element{
   list-style-type: none;
-  font-size: x-large;
+  font-size: 30px;
+}
+.group_element input{
+  list-style-type: none;
+  font-size: 30px;
+}
+.group_element select{
+  list-style-type: none;
+  font-size: 30px;
 }

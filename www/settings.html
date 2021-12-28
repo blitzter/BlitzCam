@@ -43,7 +43,7 @@ $( document ).ready(function() {
             $("#settings_ul").append("<li class=\"group_name\">"+group.toUpperCase()+"</li>")
             for(prop in propOptions[group]) {
                 name = group + "." + prop;
-                listItem = '<li>' + prop.toUpperCase() + ' : <select name="' + name + '">';
+                listItem = '<li class="group_element">' + prop.toUpperCase() + ' : <select name="' + name + '">';
                 for(optValue in propOptions[group][prop]) {
                     listItem += '<option value="'+propOptions[group][prop][optValue] + '" ';
                     if(propOptions[group][prop][optValue]+'' == settings[group][prop]+'') {
