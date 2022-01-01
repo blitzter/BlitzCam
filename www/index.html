@@ -14,6 +14,9 @@
         <button class="hud_button_left hud_items_opacity" id="modes" type="button" value="modes">
             <img class="hud_button" src="/camera_enhance/materialicons/48dp/1x/baseline_camera_enhance_black_48dp.png"/>
         </button>
+        <button id="battery_icon" class="hud_button_right hud_items_opacity" type="button" value="Battery">
+            <img class="hud_button" src="/battery_full/materialiconstwotone/48dp/1x/twotone_battery_full_black_48dp.png"/>
+        </button>
         <button class="hud_button_right hud_items_opacity" onClick="window.location.reload();" type="button" value="Refresh">
             <img class="hud_button" src="/refresh/materialicons/48dp/1x/baseline_refresh_black_48dp.png"/>
         </button>
@@ -46,6 +49,22 @@ $( document ).ready(function() {
     $.getJSON( "/take_photo.json", function( data ) {
       console.log('take_photo Called');
     });
+  });
+  $.getJSON("/get_battery_status.json", function(data) {
+    if("percent" in data) {
+       percent = data['percent'];
+       icon = parseInt(percent/10)*10;
+       if (icon < 20) {icon = 20; }
+       if (icon == 40) {icon = 30; }
+       if (icon == 70) {icon = 60; }
+       if (icon > 90) {
+         $('#battery_icon').find("img").attr("src", "/battery_full/materialiconstwotone/48dp/1x/twotone_battery_full_black_48dp.png");
+       } else {
+         $('#battery_icon').find("img").attr("src", "/battery_" + icon + "/materialiconstwotone/48dp/1x/twotone_battery_" + icon + "_black_48dp.png");
+       }
+    } else {
+       $('#battery_icon').hide();
+    }
   });
 });
 </script>

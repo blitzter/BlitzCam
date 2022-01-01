@@ -3,6 +3,7 @@ import json
 import os
 import time
 from typing import Tuple
+from UPS_HAT import INA219
 
 import picamera
 import logging
@@ -12,6 +13,8 @@ from http import server
 from settings import Settings
 
 cam_settings = Settings()
+# comment if ups_hat not present
+battery_monitor = INA219.INA219(addr=0x42)
 
 
 class StreamingOutput(object):
@@ -171,6 +174,19 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             return self.get_all_modes()
         elif self.path == '/get_current_modes.json':
             return get_current_modes()
+        elif self.path == '/get_battery_status.json':
+            if not battery_monitor:
+                return "{}"
+            status = {'bus_voltage': int(battery_monitor.getBusVoltage_V()*1000)/1000,
+                      'shunt_voltage': int(battery_monitor.getShuntVoltage_mV()*1000) / 1000000,
+                      'current': battery_monitor.getCurrent_mA(), 'power': battery_monitor.getPower_W()}
+            p = (status['bus_voltage'] - 6) / 2.4 * 100
+            if p > 100:
+                p = 100
+            if p < 0:
+                p = 0
+            status['percent'] = int(p)
+            return json.dumps(status, indent=4)
         elif self.path == '/take_photo.json':
             view_camera.stop_recording()
             filename = 'data/captures/' + (str(time.time()).replace(".", "_")) + '.jpg'
