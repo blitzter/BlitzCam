@@ -11,7 +11,7 @@ Camera interface for Raspberry Pi HQ Camera + HDMI touchscreen
 * Support for GPIO shutter
 * ?? Send files to ftp/smb/ssh
 * ?? Support hotspot with shared gallery
-* ?? battery details
+* battery details (added using Waveshare ups_hat)
 
 ## Screenshots
 camera interface (WIP)
@@ -21,6 +21,10 @@ camera interface (WIP)
 Settings interface (WIP)
 
 ![Settings Interface](./documentation/settings_interface.jpg)
+
+Mode Selection (WIP)
+
+![Settings Interface](./documentation/mode_selection.jpg)
 
 ## Requirements
 Raspberry Pi
