@@ -12,9 +12,6 @@
         <button class="hud_button_left" id="back" type="button">
             <img class="hud_button" src="/arrow_back/materialicons/48dp/1x/baseline_arrow_back_black_48dp.png"/>
         </button>
-        <button class="hud_button_right" id="save" type="button">
-            <img class="hud_button" src="/save/materialicons/48dp/1x/baseline_save_black_48dp.png"/>
-        </button>
     </div>
     <div id="settings_div">
         <ul id="settings_ul"></ul>
@@ -24,16 +21,6 @@
 $( document ).ready(function() {
   $('#back').on("click", function() {
     $(location).attr("href", "/index.html");
-  });
-  $('#save').on("click", function() {
-    data = {}
-    $("#settings_ul").find(":input").each(function(){
-      console.log($(this).attr('name') + '=' + $(this).val());
-      data[$(this).attr('name')] = $(this).val();
-    });
-    $.post("/save_modes", JSON.stringify(data), function(result){
-      console.log("Message : "+result["message"]);
-    });
   });
   var propOptions = {}
   $.getJSON( "/get_all_modes.json", function( data ) {
@@ -52,6 +39,17 @@ $( document ).ready(function() {
             listItem += '</select></li>';
             $("#settings_ul").append(listItem);
         }
+
+       $("#settings_ul").find("select").on("change", function() {
+         data = {}
+         $("#settings_ul").find("select").each(function(){
+           console.log($(this).attr('name') + '=' + $(this).val());
+           data[$(this).attr('name')] = $(this).val();
+         });
+         $.post("/save_modes", JSON.stringify(data), function(result){
+           console.log("Message : "+result["message"]);
+         });
+       });
     });
   });
 });
