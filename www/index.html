@@ -50,22 +50,28 @@ $( document ).ready(function() {
       console.log('take_photo Called');
     });
   });
-  $.getJSON("/get_battery_status.json", function(data) {
-    if("percent" in data) {
-       percent = data['percent'];
-       icon = parseInt(percent/10)*10;
-       if (icon < 20) {icon = 20; }
-       if (icon == 40) {icon = 30; }
-       if (icon == 70) {icon = 60; }
-       if (icon > 90) {
-         $('#battery_icon').find("img").attr("src", "/battery_full/materialiconstwotone/48dp/1x/twotone_battery_full_black_48dp.png");
-       } else {
-         $('#battery_icon').find("img").attr("src", "/battery_" + icon + "/materialiconstwotone/48dp/1x/twotone_battery_" + icon + "_black_48dp.png");
-       }
-    } else {
-       $('#battery_icon').hide();
-    }
-  });
+
+  battery_status_interval = setInterval(get_battery_status, 60000);
+  function get_battery_status() {
+      $.getJSON("/get_battery_status.json", function(data) {
+        if("percent" in data) {
+           percent = data['percent'];
+           icon = parseInt(percent/10)*10;
+           if (icon < 20) {icon = 20; }
+           if (icon == 40) {icon = 30; }
+           if (icon == 70) {icon = 60; }
+           if (icon > 90) {
+             $('#battery_icon').find("img").attr("src", "/battery_full/materialiconstwotone/48dp/1x/twotone_battery_full_black_48dp.png");
+           } else {
+             $('#battery_icon').find("img").attr("src", "/battery_" + icon + "/materialiconstwotone/48dp/1x/twotone_battery_" + icon + "_black_48dp.png");
+           }
+        } else {
+           clearInterval(battery_status_interval);
+           $('#battery_icon').hide();
+        }
+      });
+  }
+  get_battery_status();
 });
 </script>
 </body>
