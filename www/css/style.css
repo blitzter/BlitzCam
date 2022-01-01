@@ -48,6 +48,7 @@ body {
   margin: 2px;
   padding: 0px;
   background-color: rgba(c,c,c,0.3);
+  opacity: 0.3;
   border: 0px;
 }
 .hud_button_left {
@@ -58,6 +59,7 @@ body {
   margin: 2px;
   padding: 0px;
   background-color: rgba(c,c,c,0.3);
+  opacity: 0.3;
   border: 0px;
 }
 .hud_button {
@@ -72,6 +74,7 @@ body {
   height: 56px;
   margin: 1px;
   padding: 0px;
+  opacity: 0.5;
 }
 #settings_div {
   position: absolute;
